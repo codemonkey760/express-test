@@ -18,6 +18,10 @@ const configure_server_routes = (app) => {
     app.patch('/user/:id', (req, res) => {
         update_user(req.params.id, req.body)
     })
+
+    app.post('/user/login', (req, res) => {
+        response = login_user(req.body)
+    })
 }
 
 module.exports = {

@@ -18,6 +18,13 @@ const update_user = (id, payload) => {
     update_db_user(user_id, user_name, pass_word)
 }
 
+const login_user = (payload) => {
+    let user_name = validate_user_name(payload.user_name)
+    let pass_word = validate_pass_word(payload.pass_word)
+
+    return create_token()
+}
+
 const validate_id = (id) => {
     return id
 }
@@ -32,5 +39,6 @@ const validate_pass_word = (pass_word) => {
 
 module.exports = {
     create_user,
-    update_user
+    update_user,
+    login_user
 }
