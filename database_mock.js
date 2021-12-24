@@ -1,70 +1,108 @@
-let database = []
+const { v4: uuidv4 } = require('uuid')
+
+let database = {}
+let next_user_id = 0
+let next_token_id = 0
 
 const get_user = (id) => {
-    if (database.length < id - 1) {
-        throw new Error('User with id doesnt exist')
-    }
+    return database.users.find(user_obj => user_obj.id === id)
+}
 
-    return database[id]
+const get_user_by_user_name = (user_name) => {
+    return database.users.find(user_obj => user_obj.user_name === user_name)
 }
 
 const get_user_by_credentials = (user_name, pass_word) => {
-    database.forEach((user_obj) => {
-        if (
-            user_obj.user_name === user_name ||
-            user_obj.pass_word === pass_word
-        ) {
-            return user_obj
-        }
-    })
-
-    throw new Error('User doesnt exist')
+    return database.users.find(user_obj => user_obj.user_name === user_name && user_obj.pass_word === pass_word)
 }
 
 const create_user = (data) => {
-    let new_user = {}
-    new_user.user_name = data.user_name
-    new_user.pass_word = data.pass_word
+    let user_name = data.user_name
+    if (get_user_by_user_name(user_name)) {
+        throw new Error('Database constraint violation: user_name must be unique')
+    }
 
-    let id = database.length
+    let new_user = {
+        user_name,
+        pass_word: data.pass_word,
+        id: next_user_id++
+    }
 
-    database.push(new_user)
+    database.users.push(new_user)
 
-    return id;
+    return new_user.id
 }
 
 const update_user = (id, user_name, pass_word) => {
-    if (database.length < id - 1) {
-        throw new Error('User with id doesnt exist')
-
+    let user_obj = get_user(id)
+    if (!user_obj) {
+        throw new Error('User doesnt exist')
     }
 
-    let user_obj = database[id]
     user_obj.user_name = user_name
     user_obj.pass_word = pass_word
 }
 
 const seed_database_with_initial_data = () => {
-    if (database.length !== 0) {
-        throw new Error('Attempt to seed non empty database')
+    database = {
+        'users': [
+            {
+                'id': 0,
+                'user_name': 'user1',
+                'pass_word': 'pass1',
+            },
+            {
+                'id': 1,
+                'user_name': 'user2',
+                'pass_word': 'pass2',
+            },
+        ],
+        'tokens': [],
     }
 
-    database = [
-        {
-            'user_name': 'user1',
-            'pass_word': 'pass1',
-        },
-        {
-            'user_name': 'user2',
-            'pass_word': 'pass2',
-        },
-    ]
+    next_user_id = 2
+    next_token_id = 0
+}
+
+const get_token_by_value = (token_value) => {
+    return database.tokens.find(token_obj => token_obj.value === token_value)
+}
+
+const create_token = (id) => {
+    if (!get_user(id)) {
+        throw new Error('User doesnt exist')
+    }
+
+    invalidate_all_user_tokens(id)
+
+    let new_token = {
+        'id': next_token_id++,
+        'user_id': id,
+        'valid': true,
+        'token': uuidv4()
+    }
+
+    database.tokens.push(new_token)
+
+    return new_token.token
+}
+
+const invalidate_all_user_tokens = (id) => {
+    database.tokens.forEach((token_obj) => {
+        if (token_obj.user_id === id) {
+            token_obj.valid = false
+        }
+    })
 }
 
 module.exports = {
     get_user,
+    get_user_by_user_name,
     get_user_by_credentials,
     create_user,
     update_user,
-    seed_database_with_initial_data
+    seed_database_with_initial_data,
+    get_token_by_value,
+    create_token,
+    invalidate_all_user_tokens
 }
