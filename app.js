@@ -1,5 +1,8 @@
+const {seed_database_with_initial_data} = require('./database_mock')
 const {configure_server_routes} = require('./routes')
 const {configure_server_middleware} = require('./middleware')
+
+seed_database_with_initial_data()
 
 const express = require('express')
 const app = express()

@@ -44,9 +44,27 @@ const update_user = (id, user_name, pass_word) => {
     user_obj.pass_word = pass_word
 }
 
+const seed_database_with_initial_data = () => {
+    if (database.length !== 0) {
+        throw new Error('Attempt to seed non empty database')
+    }
+
+    database = [
+        {
+            'user_name': 'user1',
+            'pass_word': 'pass1',
+        },
+        {
+            'user_name': 'user2',
+            'pass_word': 'pass2',
+        },
+    ]
+}
+
 module.exports = {
     get_user,
     get_user_by_credentials,
     create_user,
-    update_user
+    update_user,
+    seed_database_with_initial_data
 }
