@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const {seed_database_with_initial_data} = require('./database_mock')
 const {configure_server_routes} = require('./routes')
 
